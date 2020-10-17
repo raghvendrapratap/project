@@ -1,6 +1,44 @@
 <?php include('header.php'); ?>
-<?php include('sidebar.php'); ?>
+<?php include('sidebar.php');
+include('config.php'); ?>
+<?php
+$name1 = "submit";
+$value = "submit";
+$x = 0;
+$name = "";
+if (isset($_GET['id'])) {
+    if ($_GET['action'] == 'delete') {
+        $id = $_GET['id'];
+        $sql = "DELETE from tags WHERE id = $id";
+        $result = $conn->query($sql);
+    }
 
+    if ($_GET['action'] == 'edit') {
+        $x = 1;
+        $name = $_GET['name'];
+        $name1 = "update";
+        $value = "Update";
+    }
+    // unset($_GET['id']);
+}
+
+if (isset($_POST['update'])) {
+
+    $id = $_POST['id'];
+    $name = isset($_POST['name']) ? $_POST['name'] : '';
+    $sql = "UPDATE tags SET name = '$name' WHERE id = $id;";
+    $result = $conn->query($sql);
+}
+
+
+if (isset($_POST['submit'])) {
+
+    $name = isset($_POST['name']) ? $_POST['name'] : '';
+    $sql = "INSERT INTO tags (name) VALUES('$name')";
+    $result = $conn->query($sql);
+}
+
+?>
 <div id="main-content">
     <!-- Main Content Section with everything -->
 
@@ -24,11 +62,15 @@
 
         <div class="content-box-header">
 
-            <h3>Content box</h3>
+            <h3>Tags</h3>
 
             <ul class="content-box-tabs">
-                <li><a href="#tab1" class="default-tab">Manage</a></li> <!-- href must be unique and match the id of target div -->
-                <li><a href="#tab2">Add</a></li>
+                <li><a href="#tab1" <?php if ($x == 0) : ?>class="default-tab" <?php endif; ?>>Manage</a></li> <!-- href must be unique and match the id of target div -->
+                <li><a href="#tab2" <?php if ($x == 1) : ?>class="default-tab" <?php endif; ?>><?php if ($value == "submit") {
+                                                                                                    echo "Add";
+                                                                                                } else {
+                                                                                                    echo "Update";
+                                                                                                } ?></a></li>
             </ul>
 
             <div class="clear"></div>
@@ -37,7 +79,7 @@
 
         <div class="content-box-content">
 
-            <div class="tab-content default-tab" id="tab1">
+            <div class="tab-content <?php if ($x == 0) : ?>default-tab <?php endif; ?>" id="tab1">
                 <!-- This is the target div. id must match the href of this div's tab -->
 
                 <div class="notification attention png_bg">
@@ -52,18 +94,47 @@
                     <thead>
                         <tr>
                             <th><input class="check-all" type="checkbox" /></th>
-                            <th>Column 1</th>
-                            <th>Column 2</th>
-                            <th>Column 3</th>
-                            <th>Column 4</th>
-                            <th>Column 5</th>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Action</th>
                         </tr>
 
                     </thead>
+                    <tbody>
+                        <?php
+                        $row_page = 10;
+                        if (isset($_GET['page'])) {
+                            $page = $_GET['page'];
+                        } else {
+                            $page = 1;
+                        }
 
+                        $start = ($page - 1) * $row_page;
+                        $sql = "SELECT * FROM tags LIMIT $start, $row_page";
+                        $result = $conn->query($sql);
+                        if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                        ?>
+
+
+                                <tr>
+                                    <td><input type="checkbox" /></td>
+                                    <td><?php echo $row["id"]; ?></td>
+                                    <td><?php echo $row["name"]; ?></td>
+                                    <td>
+                                        <!-- Icons -->
+                                        <a href="tags.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&action=edit" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
+                                        <a href="tags.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&action=delete" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
+                                        <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
+                                    </td>
+                                </tr>
+                            <?php } ?>
+                        <?php } ?>
+
+                    </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="6">
+                            <td colspan="4">
                                 <div class="bulk-actions align-left">
                                     <select name="dropdown">
                                         <option value="option1">Choose an action...</option>
@@ -73,188 +144,65 @@
                                     <a class="button" href="#">Apply to selected</a>
                                 </div>
 
+                                <?php
+                                $sql = "SELECT COUNT(*) FROM tags";
+                                $result = $conn->query($sql);
+                                $row = mysqli_fetch_row($result);
+                                $total_row = $row[0];
+                                $total_page = ceil($total_row / $row_page);
+                                $pagelink = "";
+                                $prev = "";
+                                $next = "";
+                                if ($page > 1) {
+                                    $prev = "<a href='tags.php?page=" . ($page - 1) . "' title='Previous Page'>&laquo; Previous</a>";
+                                }
+                                for ($i = 1; $i <= $total_page; $i++) {
+                                    if ($i == $page) {
+                                        $pagelink .= "<a class='active' href='tags.php?page=" . $i . "'>" . $i . "</a>";
+                                    } else {
+                                        $pagelink .= "<a href='tags.php?page=" . $i . "'>" . $i . "</a>";
+                                    }
+                                };
+                                if ($page < $total_page) {
+                                    $next = "<a href='tags.php?page=" . ($page + 1) . "'>  Next  &raquo; </a>";
+                                }
+
+                                ?>
+
                                 <div class="pagination">
-                                    <a href="#" title="First Page">&laquo; First</a><a href="#" title="Previous Page">&laquo; Previous</a>
-                                    <a href="#" class="number" title="1">1</a>
-                                    <a href="#" class="number" title="2">2</a>
-                                    <a href="#" class="number current" title="3">3</a>
-                                    <a href="#" class="number" title="4">4</a>
-                                    <a href="#" title="Next Page">Next &raquo;</a><a href="#" title="Last Page">Last &raquo;</a>
+                                    <a href="tags.php?page=1" title="First Page">&laquo; First</a>
+                                    <?php echo $prev;
+                                    echo $pagelink;
+                                    echo $next; ?>
+                                    <!-- <a href="#" title="Next Page">Next &raquo;</a> -->
+                                    <a href="tags.php?page=<?php echo $total_page; ?>" title="Last Page">Last &raquo;</a>
                                 </div> <!-- End .pagination -->
                                 <div class="clear"></div>
                             </td>
                         </tr>
                     </tfoot>
 
-                    <tbody>
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>Lorem ipsum dolor</td>
-                            <td><a href="#" title="title">Sit amet</a></td>
-                            <td>Consectetur adipiscing</td>
-                            <td>Donec tortor diam</td>
-                            <td>
-                                <!-- Icons -->
-                                <a href="#" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                <a href="#" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>Lorem ipsum dolor</td>
-                            <td><a href="#" title="title">Sit amet</a></td>
-                            <td>Consectetur adipiscing</td>
-                            <td>Donec tortor diam</td>
-                            <td>
-                                <!-- Icons -->
-                                <a href="#" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                <a href="#" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>Lorem ipsum dolor</td>
-                            <td><a href="#" title="title">Sit amet</a></td>
-                            <td>Consectetur adipiscing</td>
-                            <td>Donec tortor diam</td>
-                            <td>
-                                <!-- Icons -->
-                                <a href="#" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                <a href="#" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>Lorem ipsum dolor</td>
-                            <td><a href="#" title="title">Sit amet</a></td>
-                            <td>Consectetur adipiscing</td>
-                            <td>Donec tortor diam</td>
-                            <td>
-                                <!-- Icons -->
-                                <a href="#" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                <a href="#" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>Lorem ipsum dolor</td>
-                            <td><a href="#" title="title">Sit amet</a></td>
-                            <td>Consectetur adipiscing</td>
-                            <td>Donec tortor diam</td>
-                            <td>
-                                <!-- Icons -->
-                                <a href="#" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                <a href="#" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>Lorem ipsum dolor</td>
-                            <td><a href="#" title="title">Sit amet</a></td>
-                            <td>Consectetur adipiscing</td>
-                            <td>Donec tortor diam</td>
-                            <td>
-                                <!-- Icons -->
-                                <a href="#" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                <a href="#" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>Lorem ipsum dolor</td>
-                            <td><a href="#" title="title">Sit amet</a></td>
-                            <td>Consectetur adipiscing</td>
-                            <td>Donec tortor diam</td>
-                            <td>
-                                <!-- Icons -->
-                                <a href="#" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                <a href="#" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td><input type="checkbox" /></td>
-                            <td>Lorem ipsum dolor</td>
-                            <td><a href="#" title="title">Sit amet</a></td>
-                            <td>Consectetur adipiscing</td>
-                            <td>Donec tortor diam</td>
-                            <td>
-                                <!-- Icons -->
-                                <a href="#" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                <a href="#" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
-                            </td>
-                        </tr>
-                    </tbody>
-
                 </table>
 
             </div> <!-- End #tab1 -->
 
-            <div class="tab-content" id="tab2">
+            <div class="tab-content <?php if ($x == 1) : ?>default-tab <?php endif; ?>" id="tab2">
 
-                <form action="#" method="post">
+                <form action="tags.php" method="post">
 
                     <fieldset>
                         <!-- Set class to "column-left" or "column-right" on fieldsets to divide the form into columns -->
 
-                        <p>
-                            <label>Small form input</label>
-                            <input class="text-input small-input" type="text" id="small-input" name="small-input" /> <span class="input-notification success png_bg">Successful message</span> <!-- Classes for input-notification: success, error, information, attention -->
-                            <br /><small>A small description of the field</small>
+
+
+                        <p> <input type="hidden" id="id" name="id" value="<?php echo $_GET['id']; ?>" />
+                            <label>Name</label>
+                            <input class="text-input medium-input" type="text" id="name" name="name" value="<?php echo $name; ?>" />
                         </p>
 
-                        <p>
-                            <label>Medium form input</label>
-                            <input class="text-input medium-input datepicker" type="text" id="medium-input" name="medium-input" /> <span class="input-notification error png_bg">Error message</span>
-                        </p>
 
                         <p>
-                            <label>Large form input</label>
-                            <input class="text-input large-input" type="text" id="large-input" name="large-input" />
-                        </p>
-
-                        <p>
-                            <label>Checkboxes</label>
-                            <input type="checkbox" name="checkbox1" /> This is a checkbox <input type="checkbox" name="checkbox2" /> And this is another checkbox
-                        </p>
-
-                        <p>
-                            <label>Radio buttons</label>
-                            <input type="radio" name="radio1" /> This is a radio button<br />
-                            <input type="radio" name="radio2" /> This is another radio button
-                        </p>
-
-                        <p>
-                            <label>This is a drop down list</label>
-                            <select name="dropdown" class="small-input">
-                                <option value="option1">Option 1</option>
-                                <option value="option2">Option 2</option>
-                                <option value="option3">Option 3</option>
-                                <option value="option4">Option 4</option>
-                            </select>
-                        </p>
-
-                        <p>
-                            <label>Textarea with WYSIWYG</label>
-                            <textarea class="text-input textarea wysiwyg" id="textarea" name="textfield" cols="79" rows="15"></textarea>
-                        </p>
-
-                        <p>
-                            <input class="button" type="submit" value="Submit" />
+                            <input class="button" type="submit" value="<?php echo $value; ?>" name="<?php echo $name1; ?>" />
                         </p>
 
                     </fieldset>

@@ -111,7 +111,11 @@ if (isset($_POST['submit'])) {
 
             <ul class="content-box-tabs">
                 <li><a href="#tab1" <?php if ($x == 0) : ?>class="default-tab" <?php endif; ?>>Manage</a></li> <!-- href must be unique and match the id of target div -->
-                <li><a href="#tab2" <?php if ($x == 1) : ?>class="default-tab" <?php endif; ?>>Add</a></li>
+                <li><a href="#tab2" <?php if ($x == 1) : ?>class="default-tab" <?php endif; ?>><?php if ($value == "submit") {
+                                                                                                    echo "Add";
+                                                                                                } else {
+                                                                                                    echo "Update";
+                                                                                                } ?></a></li>
             </ul>
 
             <div class="clear"></div>
@@ -147,6 +151,45 @@ if (isset($_POST['submit'])) {
 
                     </thead>
 
+                    <tbody>
+
+                        <?php
+                        $row_page = 5;
+                        if (isset($_GET['page'])) {
+                            $page = $_GET['page'];
+                        } else {
+                            $page = 1;
+                        }
+
+                        $start = ($page - 1) * $row_page;
+                        $sql = "SELECT * FROM products LIMIT $start, $row_page";
+                        $result = $conn->query($sql);
+                        if ($result->num_rows > 0) {
+                            while ($row = $result->fetch_assoc()) {
+                        ?>
+                                <tr>
+                                    <td><input type="checkbox" /></td>
+                                    <td><?php echo $row["id"]; ?></td>
+                                    <td><?php echo $row["name"]; ?></td>
+                                    <td><?php echo $row["price"]; ?></td>
+                                    <td><img src="resources/pimages/<?php echo $row["image"]; ?>" alt="<?php echo $row["image"]; ?>" width='84' height='100' /></img> </td>
+                                    <td><?php echo $row["category"]; ?></td>
+                                    <td><?php echo $row["tags"]; ?></td>
+                                    <td><?php echo $row["description"]; ?></td>
+                                    <td>
+                                        <!-- Icons -->
+                                        <a href="products.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&price=<?php echo $row["price"]; ?>&img=<?php echo $row["image"]; ?>&cat=<?php echo $row["category"]; ?>&tags=<?php echo $row["tags"]; ?>&action=edit" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
+                                        <a href="products.php?id=<?php echo $row["id"]; ?>&action=delete" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
+                                        <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
+                                    </td>
+                                </tr>
+
+                            <?php } ?>
+                        <?php
+                        }
+                        ?>
+                    </tbody>
+
                     <tfoot>
                         <tr>
                             <td colspan="9">
@@ -158,51 +201,43 @@ if (isset($_POST['submit'])) {
                                     </select>
                                     <a class="button" href="#">Apply to selected</a>
                                 </div>
+                                <?php
+                                $sql = "SELECT COUNT(*) FROM products";
+                                $result = $conn->query($sql);
+                                $row = mysqli_fetch_row($result);
+                                $total_row = $row[0];
+                                $total_page = ceil($total_row / $row_page);
+                                $pagelink = "";
+                                $prev = "";
+                                $next = "";
+                                if ($page > 1) {
+                                    $prev = "<a href='products.php?page=" . ($page - 1) . "' title='Previous Page'>&laquo; Previous</a>";
+                                }
+                                for ($i = 1; $i <= $total_page; $i++) {
+                                    if ($i == $page) {
+                                        $pagelink .= "<a class='active' href='products.php?page=" . $i . "'>" . $i . "</a>";
+                                    } else {
+                                        $pagelink .= "<a href='products.php?page=" . $i . "'>" . $i . "</a>";
+                                    }
+                                };
+                                if ($page < $total_page) {
+                                    $next = "<a href='products.php?page=" . ($page + 1) . "'>  Next  &raquo; </a>";
+                                }
+
+                                ?>
 
                                 <div class="pagination">
-                                    <a href="#" title="First Page">&laquo; First</a><a href="#" title="Previous Page">&laquo; Previous</a>
-                                    <a href="#" class="number" title="1">1</a>
-                                    <a href="#" class="number" title="2">2</a>
-                                    <a href="#" class="number current" title="3">3</a>
-                                    <a href="#" class="number" title="4">4</a>
-                                    <a href="#" title="Next Page">Next &raquo;</a><a href="#" title="Last Page">Last &raquo;</a>
+                                    <a href="products.php?page=1" title="First Page">&laquo; First</a>
+                                    <?php echo $prev;
+                                    echo $pagelink;
+                                    echo $next; ?>
+                                    <!-- <a href="#" title="Next Page">Next &raquo;</a> -->
+                                    <a href="products.php?page=<?php echo $total_page; ?>" title="Last Page">Last &raquo;</a>
                                 </div> <!-- End .pagination -->
                                 <div class="clear"></div>
                             </td>
                         </tr>
                     </tfoot>
-
-                    <tbody>
-
-                        <?php
-                        $sql = "SELECT * FROM products";
-                        $result = $conn->query($sql);
-
-                        if ($result->num_rows > 0) {
-                            while ($row = $result->fetch_assoc()) {
-                        ?>
-                                <tr>
-                                    <td><input type="checkbox" /></td>
-                                    <td><?php echo $row["id"]; ?></td>
-                                    <td><?php echo $row["name"]; ?></td>
-                                    <td><?php echo $row["price"]; ?></td>
-                                    <td><img src="resources/pimages/<?php echo $row["image"]; ?>" alt="<?php echo $row["image"]; ?>" /></img> </td>
-                                    <td><?php echo $row["category"]; ?></td>
-                                    <td><?php echo $row["tags"]; ?></td>
-                                    <td><?php echo $row["description"]; ?></td>
-                                    <td>
-                                        <!-- Icons -->
-                                        <a href="products.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&price=<?php echo $row["price"]; ?>&img=<?php echo $row["image"]; ?>&cat=<?php echo $row["category"]; ?>&tags=<?php echo $row["tags"]; ?>&desc=<?php echo $row["description"]; ?>&action=edit" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                        <a href="products.php?id=<?php echo $row["id"]; ?>&action=delete" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
-                                        <!-- <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a> -->
-                                    </td>
-                                </tr>
-
-                            <?php } ?>
-                        <?php
-                        }
-                        ?>
-                    </tbody>
 
                 </table>
 

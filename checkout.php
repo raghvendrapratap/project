@@ -291,10 +291,12 @@ include('admin/config.php');
                         </tr>
                       </thead>
                       <tbody>
+
                         <?php
                         $totalprice = 0;
                         $sql = "SELECT * FROM cart ";
                         $result = $conn->query($sql);
+
                         if ($result->num_rows > 0) {
                           while ($row = $result->fetch_assoc()) {
                         ?>
@@ -305,6 +307,7 @@ include('admin/config.php');
                                     $totalprice += $total;
                                     echo $total; ?></td>
                             </tr>
+
                           <?php } ?>
                         <?php } ?>
 

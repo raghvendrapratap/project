@@ -260,17 +260,23 @@ jQuery(function($) {
                 },
                 snap: true,
                 connect: true,
-                start: [300, 1200]
+                start: [300, 1000]
+
             });
             // for value print
             var skipValues = [
                 document.getElementById('skip-value-lower'),
                 document.getElementById('skip-value-upper')
             ];
-
+            var minPrice = document.getElementById('min-price');
+            var maxPrice = document.getElementById('max-price');
             skipSlider.noUiSlider.on('update', function(values, handle) {
                 skipValues[handle].innerHTML = values[handle];
+                minPrice.value = values[0];
+                maxPrice.value = values[1];
+
             });
+
         }
     });
 

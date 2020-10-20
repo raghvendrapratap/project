@@ -143,11 +143,15 @@ include('admin/config.php'); ?>
                             </div>
                             <!-- / logo  -->
                             <!-- cart box -->
+
                             <?php
+
                             $totalprice = 0;
                             $sql = "SELECT * FROM cart ";
                             $result = $conn->query($sql);
+
                             if ($result->num_rows > 0) {
+
                             ?>
 
 
@@ -159,10 +163,11 @@ include('admin/config.php'); ?>
                                     </a>
                                     <div class="aa-cartbox-summary">
                                         <ul>
+
                                             <?php while ($row = $result->fetch_assoc()) {
+
                                                 $total = $row['quantity'] * $row['price'];
                                                 $totalprice += $total;
-
                                             ?>
                                                 <li>
                                                     <a class="aa-cartbox-img" href="#"><img src="admin/resources/pimages/<?php echo $row['image']; ?>" alt="img"></a>

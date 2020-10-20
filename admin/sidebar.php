@@ -2,8 +2,8 @@
     <div id="sidebar-wrapper">
         <?php $filename = basename($_SERVER['REQUEST_URI']);
         $file = explode('?', $filename);
-        $productmenu = array('products.php', 'categories.php', 'tags.php');
-        $usermenu = array('users.php', 'manageusers.php');
+        $productmenu = array('products.php', 'categories.php', 'tags.php', 'colors.php');
+        $usermenu = array('manageusers.php');
         $ordermenu = array('manageorders.php');
         $settingmenu = array('setting.php');
 
@@ -26,7 +26,7 @@
             <!-- Accordion Menu -->
 
             <li>
-                <a href="http://www.google.com/" class="nav-top-item no-submenu">
+                <a href="#" class="nav-top-item no-submenu">
                     <!-- Add the class "no-submenu" to menu items with no sub menu -->
                     Dashboard
                 </a>
@@ -41,6 +41,7 @@
                     <li><a <?php if ($file[0] == 'products.php') : ?> class="current" <?php endif; ?> href="products.php">Manage Product</a></li>
                     <li><a <?php if ($file[0] == 'categories.php') : ?> class="current" <?php endif; ?> href="categories.php">Manage Categories</a></li>
                     <li><a <?php if ($file[0] == 'tags.php') : ?> class="current" <?php endif; ?> href="tags.php">Manage Tags</a></li>
+                    <li><a <?php if ($file[0] == 'colors.php') : ?> class="current" <?php endif; ?> href="colors.php">Manage Colors</a></li>
                 </ul>
             </li>
 
@@ -49,7 +50,6 @@
                     Users
                 </a>
                 <ul>
-                    <li><a <?php if ($file[0] == 'users.php') : ?> class="current" <?php endif; ?> href="users.php">Add User</a></li>
                     <li><a <?php if ($file[0] == 'manageusers.php') : ?> class="current" <?php endif; ?>href="manageusers.php">Manage Users</a></li>
                 </ul>
             </li>

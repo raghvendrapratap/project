@@ -10,6 +10,7 @@ $img = "";
 $cat = "";
 $des = "";
 $tag_arr = array();
+$color_arr = array();
 include('config.php');
 
 if (isset($_GET['id'])) {
@@ -27,7 +28,9 @@ if (isset($_GET['id'])) {
         $cat = $_GET['cat'];
         $tag = $_GET['tags'];
         $tag_arr = explode(" ", $tag);
-        $des = $_GET['desc'];
+        $col = $_GET['color'];
+        $color_arr = explode(" ", $col);
+        //$des = $_GET['desc'];
         $name1 = "update";
         $value = "Update";
     }
@@ -36,11 +39,19 @@ if (isset($_GET['id'])) {
 
 if (isset($_POST['update'])) {
     $checkbox = "";
+    $colorbox = "";
     $checkbox = isset($_POST['check']) ? $_POST['check'] : '';
     $chk = "";
     if ($checkbox != "") {
         foreach ($checkbox as $chk1) {
             $chk .= $chk1 . " ";
+        }
+    }
+    $colorbox = isset($_POST['color']) ? $_POST['color'] : '';
+    $color1 = "";
+    if ($colorbox != "") {
+        foreach ($colorbox as $col1) {
+            $color1 .= $col1 . " ";
         }
     }
     //echo $chk;
@@ -51,11 +62,12 @@ if (isset($_POST['update'])) {
     $category = isset($_POST['category']) ? $_POST['category'] : '';
     $tags = $chk;
     $description = isset($_POST['description']) ? $_POST['description'] : '';
+    $color = $color1;
     if ($image == '') {
         $image = $_POST['img'];
     }
 
-    $sql = "UPDATE products SET name = '$name', price= $price, image='$image', category='$category',tags='$tags',description='$description'
+    $sql = "UPDATE products SET name = '$name', price= $price, image='$image', category='$category',tags='$tags',description='$description', color='$color'
     WHERE id = $id;";
     $result = $conn->query($sql);
 }
@@ -63,11 +75,19 @@ if (isset($_POST['update'])) {
 
 if (isset($_POST['submit'])) {
     $checkbox = "";
+    $colorbox = "";
     $checkbox = isset($_POST['check']) ? $_POST['check'] : '';
     $chk = "";
     if ($checkbox != "") {
         foreach ($checkbox as $chk1) {
             $chk .= $chk1 . " ";
+        }
+    }
+    $colorbox = isset($_POST['color']) ? $_POST['color'] : '';
+    $color1 = "";
+    if ($colorbox != "") {
+        foreach ($colorbox as $col1) {
+            $color1 .= $col1 . " ";
         }
     }
     //echo $chk;
@@ -77,8 +97,9 @@ if (isset($_POST['submit'])) {
     $category = isset($_POST['category']) ? $_POST['category'] : '';
     $tags = $chk;
     $description = isset($_POST['description']) ? $_POST['description'] : '';
+    $color = $color1;
 
-    $sql = "INSERT INTO products (name, price, image,category, tags,description) VALUES('$name',$price,'$image','$category','$tags','$description')";
+    $sql = "INSERT INTO products (name, price, image,category, tags,description,color) VALUES('$name',$price,'$image','$category','$tags','$description','$color')";
     $result = $conn->query($sql);
 }
 
@@ -145,6 +166,7 @@ if (isset($_POST['submit'])) {
                             <th>Image</th>
                             <th>Category</th>
                             <th>Tags</th>
+                            <th>Color</th>
                             <th>Description</th>
                             <th>Action</th>
                         </tr>
@@ -175,10 +197,11 @@ if (isset($_POST['submit'])) {
                                     <td><img src="resources/pimages/<?php echo $row["image"]; ?>" alt="<?php echo $row["image"]; ?>" width='84' height='100' /></img> </td>
                                     <td><?php echo $row["category"]; ?></td>
                                     <td><?php echo $row["tags"]; ?></td>
+                                    <td><?php echo $row["color"]; ?></td>
                                     <td><?php echo $row["description"]; ?></td>
                                     <td>
                                         <!-- Icons -->
-                                        <a href="products.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&price=<?php echo $row["price"]; ?>&img=<?php echo $row["image"]; ?>&cat=<?php echo $row["category"]; ?>&tags=<?php echo $row["tags"]; ?>&action=edit" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
+                                        <a href="products.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&price=<?php echo $row["price"]; ?>&img=<?php echo $row["image"]; ?>&cat=<?php echo $row["category"]; ?>&tags=<?php echo $row["tags"]; ?>&color=<?php echo $row["color"]; ?>&action=edit" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
                                         <a href="products.php?id=<?php echo $row["id"]; ?>&action=delete" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
                                         <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
                                     </td>
@@ -270,25 +293,43 @@ if (isset($_POST['submit'])) {
                             <br />
                             <!--<small>Input Product Id</small> -->
                         </p>
+
                         <p>
                             <label>Category</label>
                             <select name="category" class="small-input">
-                                <option value="men" <?php if ($cat == "men") : ?>selected<?php endif; ?>>Men</option>
-                                <option value="women" <?php if ($cat == "women") : ?>selected<?php endif; ?>>Women</option>
-                                <option value="kid" <?php if ($cat == "kid") : ?>selected<?php endif; ?>>Kid</option>
-                                <option value="electronics" <?php if ($cat == "electronics") : ?>selected<?php endif; ?>>Electronics</option>
-                                <option value="sports" <?php if ($cat == "sports") : ?>selected<?php endif; ?>>Sports</option>
+                                <?php
+                                $sql = "SELECT * FROM categories";
+                                $result = $conn->query($sql);
+                                if ($result->num_rows > 0) {
+                                    while ($row = $result->fetch_assoc()) { ?>
+                                        <option value="<?php echo $row['name']; ?>" <?php if ($cat == $row['name']) : ?>selected<?php endif; ?>><?php echo $row['name']; ?></option>
+                                    <?php } ?>
+                                <?php } ?>
                             </select>
                         </p>
                         <p>
                             <label>Tags</label>
-                            <input type="checkbox" name="check[]" value="fashion" <?php if (in_array("fashion", $tag_arr)) : ?> checked<?php endif; ?> /> Fashion
-                            <input type="checkbox" name="check[]" value="ecommerce" <?php if (in_array("ecommerce", $tag_arr)) : ?> checked<?php endif; ?> /> Ecommerce
-                            <input type="checkbox" name="check[]" value="shop" <?php if (in_array("shop", $tag_arr)) : ?> checked<?php endif; ?> /> Shop
-                            <input type="checkbox" name="check[]" value="handbag" <?php if (in_array("handbag", $tag_arr)) : ?> checked<?php endif; ?> />Handbag
-                            <input type="checkbox" name="check[]" value="laptop" <?php if (in_array("laptop", $tag_arr)) : ?> checked<?php endif; ?> /> Laptop
-                            <input type="checkbox" name="check[]" value="headphones" <?php if (in_array("headphones", $tag_arr)) : ?> checked<?php endif; ?> />Headphones
+                            <?php
+                            $sql = "SELECT * FROM tags";
+                            $result = $conn->query($sql);
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) { ?>
+                                    <input type="checkbox" name="check[]" value="<?php echo $row['name']; ?>" <?php if (in_array($row['name'], $tag_arr)) : ?> checked<?php endif; ?> /> <?php echo $row['name']; ?>
+                                <?php } ?>
+                            <?php } ?>
                         </p>
+                        <p>
+                            <label>Color</label>
+                            <?php
+                            $sql = "SELECT * FROM colors";
+                            $result = $conn->query($sql);
+                            if ($result->num_rows > 0) {
+                                while ($row = $result->fetch_assoc()) { ?>
+                                    <input type="checkbox" name="color[]" value="<?php echo $row['name']; ?>" <?php if (in_array($row['name'], $color_arr)) : ?> checked<?php endif; ?> /> <?php echo $row['name']; ?>
+                                <?php } ?>
+                            <?php } ?>
+                        </p>
+
                         <p>
                             <label>Description</label>
                             <textarea class="text-input textarea wysiwyg" id="textarea" name="description" cols="79" rows="15"><?php echo $des; ?></textarea>

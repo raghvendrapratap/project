@@ -20,14 +20,17 @@ include('admin/config.php');
     </div>
 </section>
 <!-- / catg header banner section -->
-<?php
-if (isset($_GET['id'])) {
-    $id = $_GET['id'];
 
+<?php
+
+if (isset($_GET['id'])) {
+
+    $id = $_GET['id'];
     $sql = "SELECT * from products WHERE id='$id'";
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
-} ?>
+}
+?>
 
 <!-- product category -->
 <section id="aa-product-details">
@@ -43,7 +46,7 @@ if (isset($_GET['id'])) {
                                     <div id="demo-1" class="simpleLens-gallery-container">
                                         <div class="simpleLens-container">
                                             <div class="simpleLens-big-image-container">
-                                                <a data-lens-image="img/view-slider/large/polo-shirt-1.png" class="simpleLens-lens-image"><img src="admin/resources/pimages/<?php echo $row['image']; ?>" width='250' height='300' class="simpleLens-big-image"></a>
+                                                <a data-lens-image="admin/resources/pimages/<?php echo $row['image']; ?>" class=" simpleLens-lens-image"><img src="admin/resources/pimages/<?php echo $row['image']; ?>" width='250' height='300' class="simpleLens-big-image"></a>
                                             </div>
                                         </div>
                                         <div class="simpleLens-thumbnails-container">
@@ -437,7 +440,6 @@ if (isset($_GET['id'])) {
     </div>
 </section>
 <!-- / product category -->
-
 
 <?php
 include('footer.php'); ?>

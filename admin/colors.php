@@ -1,43 +1,35 @@
 <?php include('header.php'); ?>
-<?php include('sidebar.php'); ?>
+<?php include('sidebar.php');
+include('config.php'); ?>
+
 <?php
+
 $name1 = "submit";
 $value = "submit";
 $x = 0;
 $name = "";
-$email = "";
-$pass = "";
-$address = "";
-include('config.php');
-
 if (isset($_GET['id'])) {
 
     if ($_GET['action'] == 'delete') {
         $id = $_GET['id'];
-        $sql = "DELETE from user WHERE id = $id";
+        $sql = "DELETE from colors WHERE id = $id";
         $result = $conn->query($sql);
     }
 
     if ($_GET['action'] == 'edit') {
         $x = 1;
-        $id = $_GET['id'];
         $name = $_GET['name'];
-        $email = $_GET['email'];
-        $pass = $_GET['pass'];
-        $address = $_GET['address'];
         $name1 = "update";
         $value = "Update";
     }
+    // unset($_GET['id']);
 }
 
 if (isset($_POST['update'])) {
 
     $id = $_POST['id'];
     $name = isset($_POST['name']) ? $_POST['name'] : '';
-    $email = isset($_POST['email']) ? $_POST['email'] : '';
-    $pass = isset($_POST['pass']) ? $_POST['pass'] : '';
-    $address = isset($_POST['address']) ? $_POST['address'] : '';
-    $sql = "UPDATE user SET name = '$name', email= '$email', pass='$pass', address='$address' WHERE id = $id;";
+    $sql = "UPDATE colors SET name = '$name' WHERE id = $id;";
     $result = $conn->query($sql);
 }
 
@@ -45,14 +37,9 @@ if (isset($_POST['update'])) {
 if (isset($_POST['submit'])) {
 
     $name = isset($_POST['name']) ? $_POST['name'] : '';
-    $email = isset($_POST['email']) ? $_POST['email'] : '';
-    $pass = isset($_POST['pass']) ? $_POST['pass'] : '';
-    $address = isset($_POST['address']) ? $_POST['address'] : '';
-
-    $sql = "INSERT INTO user (name, email, pass,address) VALUES('$name','$email','$pass','$address')";
+    $sql = "INSERT INTO colors (name) VALUES('$name')";
     $result = $conn->query($sql);
 }
-
 ?>
 
 <div id="main-content">
@@ -78,7 +65,7 @@ if (isset($_POST['submit'])) {
 
         <div class="content-box-header">
 
-            <h3>Users</h3>
+            <h3>Colors</h3>
 
             <ul class="content-box-tabs">
                 <li><a href="#tab1" <?php if ($x == 0) : ?>class="default-tab" <?php endif; ?>>Manage</a></li> <!-- href must be unique and match the id of target div -->
@@ -112,14 +99,10 @@ if (isset($_POST['submit'])) {
                             <th><input class="check-all" type="checkbox" /></th>
                             <th>ID</th>
                             <th>Name</th>
-                            <th>Email</th>
-                            <th>Password</th>
-                            <th>Address</th>
                             <th>Action</th>
                         </tr>
 
                     </thead>
-
                     <tbody>
 
                         <?php
@@ -131,35 +114,31 @@ if (isset($_POST['submit'])) {
                         }
 
                         $start = ($page - 1) * $row_page;
-                        $sql = "SELECT * FROM user LIMIT $start, $row_page";
+                        $sql = "SELECT * FROM colors LIMIT $start, $row_page";
                         $result = $conn->query($sql);
                         if ($result->num_rows > 0) {
                             while ($row = $result->fetch_assoc()) {
                         ?>
+
                                 <tr>
                                     <td><input type="checkbox" /></td>
                                     <td><?php echo $row["id"]; ?></td>
                                     <td><?php echo $row["name"]; ?></td>
-                                    <td><?php echo $row["email"]; ?></td>
-                                    <td><?php echo $row["pass"]; ?></td>
-                                    <td><?php echo $row["address"]; ?></td>
                                     <td>
                                         <!-- Icons -->
-                                        <a href="manageusers.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&email=<?php echo $row["email"]; ?>&pass=<?php echo $row["pass"]; ?>&address=<?php echo $row["address"]; ?>&action=edit" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
-                                        <a href="manageusers.php?id=<?php echo $row["id"]; ?>&action=delete" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
+                                        <a href="colors.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&action=edit" title="Edit"><img src="resources/images/icons/pencil.png" alt="Edit" /></a>
+                                        <a href="colors.php?id=<?php echo $row["id"]; ?>&name=<?php echo $row["name"]; ?>&action=delete" title="Delete"><img src="resources/images/icons/cross.png" alt="Delete" /></a>
                                         <a href="#" title="Edit Meta"><img src="resources/images/icons/hammer_screwdriver.png" alt="Edit Meta" /></a>
                                     </td>
                                 </tr>
 
                             <?php } ?>
-                        <?php
-                        }
-                        ?>
-                    </tbody>
+                        <?php } ?>
 
+                    </tbody>
                     <tfoot>
                         <tr>
-                            <td colspan="7">
+                            <td colspan="4">
                                 <div class="bulk-actions align-left">
                                     <select name="dropdown">
                                         <option value="option1">Choose an action...</option>
@@ -170,7 +149,7 @@ if (isset($_POST['submit'])) {
                                 </div>
 
                                 <?php
-                                $sql = "SELECT COUNT(*) FROM user";
+                                $sql = "SELECT COUNT(*) FROM colors";
                                 $result = $conn->query($sql);
                                 $row = mysqli_fetch_row($result);
                                 $total_row = $row[0];
@@ -179,28 +158,27 @@ if (isset($_POST['submit'])) {
                                 $prev = "";
                                 $next = "";
                                 if ($page > 1) {
-                                    $prev = "<a href='manageusers.php?page=" . ($page - 1) . "' title='Previous Page'>&laquo; Previous</a>";
+                                    $prev = "<a href='colors.php?page=" . ($page - 1) . "' title='Previous Page'>&laquo; Previous</a>";
                                 }
                                 for ($i = 1; $i <= $total_page; $i++) {
                                     if ($i == $page) {
-                                        $pagelink .= "<a class='active' href='manageusers.php?page=" . $i . "'>" . $i . "</a>";
+                                        $pagelink .= "<a class='active' href='colors.php?page=" . $i . "'>" . $i . "</a>";
                                     } else {
-                                        $pagelink .= "<a href='manageusers.php?page=" . $i . "'>" . $i . "</a>";
+                                        $pagelink .= "<a href='colors.php?page=" . $i . "'>" . $i . "</a>";
                                     }
                                 };
                                 if ($page < $total_page) {
-                                    $next = "<a href='manageusers.php?page=" . ($page + 1) . "'>  Next  &raquo; </a>";
+                                    $next = "<a href='colors.php?page=" . ($page + 1) . "'>  Next  &raquo; </a>";
                                 }
-
                                 ?>
 
                                 <div class="pagination">
-                                    <a href="manageusers.php?page=1" title="First Page">&laquo; First</a>
+                                    <a href="colors.php?page=1" title="First Page">&laquo; First</a>
                                     <?php echo $prev;
                                     echo $pagelink;
                                     echo $next; ?>
                                     <!-- <a href="#" title="Next Page">Next &raquo;</a> -->
-                                    <a href="manageusers.php?page=<?php echo $total_page; ?>" title="Last Page">Last &raquo;</a>
+                                    <a href="colors.php?page=<?php echo $total_page; ?>" title="Last Page">Last &raquo;</a>
                                 </div> <!-- End .pagination -->
                                 <div class="clear"></div>
                             </td>
@@ -213,36 +191,18 @@ if (isset($_POST['submit'])) {
 
             <div class="tab-content <?php if ($x == 1) : ?>default-tab <?php endif; ?>" id="tab2">
 
-                <form action="manageusers.php" method="post">
+                <form action="colors.php" method="post">
 
                     <fieldset>
                         <!-- Set class to "column-left" or "column-right" on fieldsets to divide the form into columns -->
 
-                        <input type="hidden" id="id" name="id" value="<?php if (isset($id)) {
-                                                                            echo $id;
-                                                                        }; ?>" />
-                        <p>
+
+
+                        <p> <input type="hidden" id="id" name="id" value="<?php echo $_GET['id']; ?>" />
                             <label>Name</label>
                             <input class="text-input medium-input" type="text" id="name" name="name" value="<?php echo $name; ?>" />
-                            <br />
                         </p>
-                        <p>
-                            <label>Email</label>
-                            <input class="text-input small-input" type="email" id="email" name="email" value="<?php echo $email; ?>" />
-                            <br />
 
-                        </p>
-                        <p>
-                            <label>Password</label>
-                            <input class="text-input small-input" type="password" id="pass" name="pass" value="<?php echo $pass; ?>" />
-                            <br />
-
-                        </p>
-                        <p>
-                            <label>Address</label>
-                            <input class="text-input large-input" type="text" id="address" name="address" value="<?php echo $address; ?>" />
-                            <br />
-                        </p>
 
                         <p>
                             <input class="button" type="submit" value="<?php echo $value; ?>" name="<?php echo $name1; ?>" />

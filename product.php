@@ -4,21 +4,25 @@ include('header.php');
 include('admin/config.php');
 
 if (isset($_GET['id'])) {
-    if ($_GET['action'] == 'add') {
-        $id = $_GET['id'];
 
+    if ($_GET['action'] == 'add') {
+
+        $id = $_GET['id'];
         $sql = "SELECT * from cart WHERE id='$id'";
         $result1 = $conn->query($sql);
         $row1 = $result1->fetch_assoc();
 
         if ($row1['id'] == $id) {
+
             $quant = $row1['quantity'] + 1;
             $sql = "UPDATE cart SET quantity= $quant WHERE id = $id;";
             $result = $conn->query($sql);
         } else {
             $sql = "SELECT * from products WHERE id='$id'";
             $result = $conn->query($sql);
+
             if ($result->num_rows > 0) {
+
                 $row = $result->fetch_assoc();
                 $username = 'user';
                 $id = $row['id'];
@@ -33,10 +37,13 @@ if (isset($_GET['id'])) {
     }
 
     if ($_GET['action'] == 'wish') {
+
         $id = $_GET['id'];
         $sql = "SELECT * from products WHERE id='$id'";
         $result = $conn->query($sql);
+
         if ($result->num_rows > 0) {
+
             $row = $result->fetch_assoc();
             $username = 'user';
             $id = $row['id'];
@@ -102,6 +109,7 @@ if (isset($_GET['id'])) {
                     </div>
                     <div class="aa-product-catg-body">
                         <ul class="aa-product-catg">
+
                             <?php
                             $row_page = 10;
 
@@ -110,7 +118,9 @@ if (isset($_GET['id'])) {
                             } else {
                                 $page = 1;
                             }
+
                             $start = ($page - 1) * $row_page;
+
                             if (isset($_GET['category'])) {
                                 $category = $_GET['category'];
                                 $sql = "SELECT * FROM products where category='$category' LIMIT $start, $row_page";
@@ -120,15 +130,19 @@ if (isset($_GET['id'])) {
                             } else if (isset($_GET['filter'])) {
                                 $min = $_GET['min'];
                                 $max = $_GET['max'];
-                                $sql = "SELECT * FROM products WHERE price BETWEEN $min AND $max";
+                                $sql = "SELECT * FROM products WHERE price BETWEEN $min AND $max  LIMIT $start, $row_page";
+                            } else if (isset($_GET['color'])) {
+                                $color = $_GET['color'];
+                                $sql = "SELECT * FROM products where color  LIKE '%{$color}%' LIMIT $start, $row_page";
                             } else {
                                 $sql = "SELECT * FROM products LIMIT $start, $row_page";
                             }
+
                             $result = $conn->query($sql);
+
                             if ($result->num_rows > 0) {
                                 while ($row = $result->fetch_assoc()) {
                             ?>
-
 
                                     <!-- start single product item -->
                                     <li>
@@ -152,7 +166,6 @@ if (isset($_GET['id'])) {
                              <span class="aa-badge aa-sold-out" href="#">Sold Out!</span>
                               <span class="aa-badge aa-hot" href="#">HOT!</span> -->
                                     </li>
-
 
                                     <!-- quick view modal -->
                                     <div class="modal fade" id="quick-view-modal-<?php echo $row['id']; ?>" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
@@ -231,24 +244,35 @@ if (isset($_GET['id'])) {
                                         </div>
                                         <!-- /.modal-dialog -->
                                     </div>
-                                <?php } ?>
 
+                                <?php } ?>
                         </ul>
                     <?php } ?>
+
                     <!-- / quick view modal -->
+
                     </div>
                     <div class="aa-product-catg-pagination">
                         <nav>
                             <ul class="pagination">
+
                                 <?php
+
                                 if (isset($_GET['category'])) {
                                     $category = $_GET['category'];
-                                    $sql = "SELECT COUNT(*) FROM products where category='$category' LIMIT $start, $row_page";
+                                    $sql = "SELECT COUNT(*) FROM products where category='$category' ";
                                 } else if (isset($_GET['tags'])) {
                                     $tags = $_GET['tags'];
-                                    $sql = "SELECT COUNT(*) FROM products where tags  LIKE '%{$tags}%' LIMIT $start, $row_page";
+                                    $sql = "SELECT COUNT(*) FROM products where tags  LIKE '%{$tags}%' ";
+                                } else if (isset($_GET['color'])) {
+                                    $color = $_GET['color'];
+                                    $sql = "SELECT COUNT(*) FROM products where color  LIKE '%{$color}%' ";
+                                } else if (isset($_GET['filter'])) {
+                                    $min = $_GET['min'];
+                                    $max = $_GET['max'];
+                                    $sql = "SELECT COUNT(*) FROM products WHERE price BETWEEN $min AND $max";
                                 } else {
-                                    $sql = "SELECT COUNT(*) FROM products LIMIT $start, $row_page";
+                                    $sql = "SELECT COUNT(*) FROM products ";
                                 }
 
                                 $result = $conn->query($sql);
@@ -258,35 +282,49 @@ if (isset($_GET['id'])) {
                                 $pagelink = "";
                                 $prev = "";
                                 $next = "";
+
                                 if ($page > 1) {
                                     $prevhref = "product.php?page=" . ($page - 1);
                                 }
                                 ?>
-                                <?php
-                                //if (isset($_GET['category'])) {
-                                //    '&category=' . $_GET['category'];
-                                // } else if (isset($_GET['tags'])) {
-                                //    '&tags=' . $_GET['tags'];
-                                // } 
-                                ?>
+
                                 <li>
                                     <a href="<?php echo $prevhref; ?>" aria-label="Previous">
                                         <span aria-hidden="true">&laquo;</span>
                                     </a>
                                 </li>
+
                                 <?php
+
                                 for ($i = 1; $i <= $total_page; $i++) {
-                                    if ($i == $page) {
-                                        $pagelink .= "<li><a href='product.php?page=" . $i . "'>" . $i . "</a></li>";
+
+                                    if (isset($_GET['category'])) {
+                                        $x = "category=" . $_GET['category'];
+                                    } else if (isset($_GET['tags'])) {
+                                        $x = "tags=" . $_GET['tags'];
+                                    } else if (isset($_GET['color'])) {
+                                        $x = "color=" . $_GET['color'];
+                                    } else if (isset($_GET['filter'])) {
+                                        $x = "min=" . $_GET['min'] . "&max=" . $_GET['max'] . "&filter=price";
                                     } else {
-                                        $pagelink .= "<li><a href='product.php?page=" . $i . "'>" . $i . "</a></li>";
+                                        $x = "";
+                                    }
+
+                                    if ($i == $page) {
+
+                                        $pagelink .= "<li><a href='product.php?" . $x . "&page=" . $i . "'>" . $i . "</a></li>";
+                                    } else {
+                                        $pagelink .= "<li><a href='product.php?" . $x . "&page=" . $i . "'>" . $i . "</a></li>";
                                     }
                                 };
+
                                 if ($page < $total_page) {
                                     $nexthref = "product.php?page=" . ($page + 1);
                                 }
                                 ?>
+
                                 <?php echo $pagelink; ?>
+
                                 <li>
                                     <a href=" <?php echo $nexthref; ?>" aria-label="Next">
                                         <span aria-hidden="true">&raquo;</span>
@@ -303,24 +341,24 @@ if (isset($_GET['id'])) {
                     <div class="aa-sidebar-widget">
                         <h3>Category</h3>
                         <ul class="aa-catg-nav">
-                            <li><a href="product.php?category=men">Men</a></li>
-                            <li><a href="product.php?category=women">Women</a></li>
-                            <li><a href="product.php?category=kid">Kids</a></li>
-                            <li><a href="product.php?category=electronics">Electornics</a></li>
-                            <li><a href="product.php?category=sports">Sports</a></li>
+                            <li><a href="product.php?category=Men">Men</a></li>
+                            <li><a href="product.php?category=Women">Women</a></li>
+                            <li><a href="product.php?category=Kid">Kids</a></li>
+                            <li><a href="product.php?category=Electronics">Electornics</a></li>
+                            <li><a href="product.php?category=Sports">Sports</a></li>
                         </ul>
                     </div>
                     <!-- single sidebar -->
                     <div class="aa-sidebar-widget">
                         <h3>Tags</h3>
                         <div class="tag-cloud">
-                            <a href="product.php?tags=fashion">Fashion</a>
-                            <a href="product.php?tags=ecommerce">Ecommerce</a>
-                            <a href="product.php?tags=shop">Shop</a>
-                            <a href="product.php?tags=handbag">Hand Bag</a>
-                            <a href="product.php?tags=laptop">Laptop</a>
-                            <a href="product.php?tags=headphone">Head Phone</a>
-                            <a href="product.php?tags=pendrive">Pen Drive</a>
+                            <a href="product.php?tags=Fashion">Fashion</a>
+                            <a href="product.php?tags=Ecommerce">Ecommerce</a>
+                            <a href="product.php?tags=Shop">Shop</a>
+                            <a href="product.php?tags=Handbag">Hand Bag</a>
+                            <a href="product.php?tags=Laptop">Laptop</a>
+                            <a href="product.php?tags=Headphone">Head Phone</a>
+                            <a href="product.php?tags=Pendrive">Pen Drive</a>
                         </div>
                     </div>
                     <!-- single sidebar -->
@@ -344,18 +382,18 @@ if (isset($_GET['id'])) {
                     <div class="aa-sidebar-widget">
                         <h3>Shop By Color</h3>
                         <div class="aa-color-tag">
-                            <a class="aa-color-green" href="#"></a>
-                            <a class="aa-color-yellow" href="#"></a>
-                            <a class="aa-color-pink" href="#"></a>
-                            <a class="aa-color-purple" href="#"></a>
-                            <a class="aa-color-blue" href="#"></a>
-                            <a class="aa-color-orange" href="#"></a>
-                            <a class="aa-color-gray" href="#"></a>
-                            <a class="aa-color-black" href="#"></a>
-                            <a class="aa-color-white" href="#"></a>
-                            <a class="aa-color-cyan" href="#"></a>
-                            <a class="aa-color-olive" href="#"></a>
-                            <a class="aa-color-orchid" href="#"></a>
+                            <a class="aa-color-green" href="product.php?color=Green"></a>
+                            <a class="aa-color-yellow" href="product.php?color=Yellow"></a>
+                            <a class="aa-color-pink" href="product.php?color=Pink"></a>
+                            <a class="aa-color-purple" href="product.php?color=Purple"></a>
+                            <a class="aa-color-blue" href="product.php?color=BLue"></a>
+                            <a class="aa-color-orange" href="product.php?color=Orange"></a>
+                            <a class="aa-color-gray" href="product.php?color=Gray"></a>
+                            <a class="aa-color-black" href="product.php?color=Black"></a>
+                            <a class="aa-color-white" href="product.php?color=White"></a>
+                            <a class="aa-color-red" href="product.php?color=Red"></a>
+                            <a class="aa-color-olive" href="product.php?color=Olive"></a>
+                            <a class="aa-color-orchid" href="product.php?color=Orchid"></a>
                         </div>
                     </div>
                     <!-- single sidebar -->

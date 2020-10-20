@@ -117,6 +117,10 @@ if (isset($_GET['id'])) {
                             } else if (isset($_GET['tags'])) {
                                 $tags = $_GET['tags'];
                                 $sql = "SELECT * FROM products where tags  LIKE '%{$tags}%' LIMIT $start, $row_page";
+                            } else if (isset($_GET['filter'])) {
+                                $min = $_GET['min'];
+                                $max = $_GET['max'];
+                                $sql = "SELECT * FROM products WHERE price BETWEEN $min AND $max";
                             } else {
                                 $sql = "SELECT * FROM products LIMIT $start, $row_page";
                             }
@@ -169,14 +173,14 @@ if (isset($_GET['id'])) {
                                                                         </div>
                                                                     </div>
                                                                     <div class="simpleLens-thumbnails-container">
-                                                                        <a href="#" class="simpleLens-thumbnail-wrapper" data-lens-image="admin/resources/pimages/<?php echo $row['image']; ?>" data-big-image="img/view-slider/medium/polo-shirt-1.png">
+                                                                        <a href="#" class="simpleLens-thumbnail-wrapper" data-lens-image="admin/resources/pimages/<?php echo $row['image']; ?>" data-big-image="admin/resources/pimages/<?php echo $row['image']; ?>" width='250' height='300'>
                                                                             <img src="admin/resources/pimages/<?php echo $row['image']; ?>" width='50' height='70'>
                                                                         </a>
-                                                                        <a href="#" class="simpleLens-thumbnail-wrapper" data-lens-image="admin/resources/pimages/<?php echo $row['image']; ?>" data-big-image="img/view-slider/medium/polo-shirt-3.png">
+                                                                        <a href="#" class="simpleLens-thumbnail-wrapper" data-lens-image="admin/resources/pimages/<?php echo $row['image']; ?>" data-big-image="admin/resources/pimages/<?php echo $row['image']; ?>" width='250' height='300'>
                                                                             <img src="admin/resources/pimages/<?php echo $row['image']; ?>" width='50' height='70'>
                                                                         </a>
 
-                                                                        <a href="#" class="simpleLens-thumbnail-wrapper" data-lens-image="admin/resources/pimages/<?php echo $row['image']; ?>" data-big-image="img/view-slider/medium/polo-shirt-4.png">
+                                                                        <a href="#" class="simpleLens-thumbnail-wrapper" data-lens-image="admin/resources/pimages/<?php echo $row['image']; ?>" data-big-image="admin/resources/pimages/<?php echo $row['image']; ?>" width='250' height='300'>
                                                                             <img src="admin/resources/pimages/<?php echo $row['image']; ?>" width='50' height='70'>
                                                                         </a>
                                                                     </div>
@@ -186,7 +190,7 @@ if (isset($_GET['id'])) {
                                                         <!-- Modal view content -->
                                                         <div class="col-md-6 col-sm-6 col-xs-12">
                                                             <div class="aa-product-view-content">
-                                                                <h3>T-Shirt</h3>
+                                                                <h3><?php echo $row['name']; ?></h3>
                                                                 <div class="aa-price-block">
                                                                     <span class="aa-product-view-price">$<?php echo $row['price']; ?></span>
                                                                     <p class="aa-product-avilability">Avilability: <span>In stock</span></p>
@@ -324,23 +328,14 @@ if (isset($_GET['id'])) {
                         <h3>Shop By Price</h3>
                         <!-- price range -->
                         <div class="aa-sidebar-price-range">
-                            <form action="">
+                            <form action="product.php">
                                 <div id="skipstep" class="noUi-target noUi-ltr noUi-horizontal noUi-background">
                                 </div>
                                 <span id="skip-value-lower" class="example-val"></span>
                                 <span id="skip-value-upper" class="example-val"></span>
-
-                                <!-- <input type="text" id="min-range" name="min-range" value=>
-                                <script>
-                                    var min = document.getElementByID('skip-value-lower').value;
-                                    document.getElementById("min-range").value = "mi";
-                                </script> -->
-
-                                <!-- <?php $abc = "<script>document.getElementByID('skip-value-lower').value;</script>";
-                                        ?>
-                                <input type="text" id="min-range" name="min-range" value="<?php echo $abc; ?>">
-                                <input type="hidden" id="max-range" name="max-range" value="max-range"> -->
-                                <button class="aa-filter-btn" type="submit" name="submit">Filter</button>
+                                <input type="hidden" id="min-price" class="example-val" name="min" />
+                                <input type="hidden" id="max-price" class="example-val" name="max" />
+                                <button class="aa-filter-btn" type="submit" name="filter" value="price">Filter</button>
                             </form>
                         </div>
 

@@ -11,13 +11,14 @@ if (isset($_GET['id'])) {
         $id = $_GET['id'];
         $sql = "DELETE from tags WHERE id = $id";
         $result = $conn->query($sql);
+        $success = "Deleted Successfully";
     }
 
     if ($_GET['action'] == 'edit') {
         $x = 1;
         $name = $_GET['name'];
         $name1 = "update";
-        $value = "Update";
+        $value = "update";
     }
     // unset($_GET['id']);
 }
@@ -28,15 +29,32 @@ if (isset($_POST['update'])) {
     $name = isset($_POST['name']) ? $_POST['name'] : '';
     $sql = "UPDATE tags SET name = '$name' WHERE id = $id;";
     $result = $conn->query($sql);
+    $success = "Tag updation successfull !";
 }
 
 
 if (isset($_POST['submit'])) {
 
     $name = isset($_POST['name']) ? $_POST['name'] : '';
-    $sql = "INSERT INTO tags (name) VALUES('$name')";
-    $result = $conn->query($sql);
+
+    if ($name != '') {
+        $sql = "SELECT name from tags WHERE name= '$name' ";
+        $result = $conn->query($sql);
+
+        if ($result->num_rows > 0) {
+            $error = "Tag Name already exist !";
+            $x = 1;
+        } else {
+            $sql = "INSERT INTO tags (name) VALUES('$name')";
+            $result = $conn->query($sql);
+            $success = "Category added successfully !";
+        }
+    } else {
+        $x = 1;
+        $error = "Please enter tag name !";
+    }
 }
+
 
 ?>
 <div id="main-content">
@@ -82,12 +100,14 @@ if (isset($_POST['submit'])) {
             <div class="tab-content <?php if ($x == 0) : ?>default-tab <?php endif; ?>" id="tab1">
                 <!-- This is the target div. id must match the href of this div's tab -->
 
-                <div class="notification attention png_bg">
-                    <a href="#" class="close"><img src="resources/images/icons/cross_grey_small.png" title="Close this notification" alt="close" /></a>
-                    <div>
-                        This is a Content Box. You can put whatever you want in it. By the way, you can close this notification with the top-right cross.
+                <?php if (isset($success)) : ?>
+                    <div class="notification success png_bg">
+                        <a href="#" class="close"><img src="resources/images/icons/cross_grey_small.png" title="Close this notification" alt="close" /></a>
+                        <div>
+                            <?php echo $success; ?>
+                        </div>
                     </div>
-                </div>
+                <?php endif; ?>
 
                 <table>
 
@@ -188,6 +208,15 @@ if (isset($_POST['submit'])) {
 
             <div class="tab-content <?php if ($x == 1) : ?>default-tab <?php endif; ?>" id="tab2">
 
+                <?php if (isset($error)) : ?>
+                    <div class="notification attention png_bg">
+                        <a href="#" class="close"><img src="resources/images/icons/cross_grey_small.png" title="Close this notification" alt="close" /></a>
+                        <div>
+                            <?php echo $error; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <form action="tags.php" method="post">
 
                     <fieldset>
@@ -198,11 +227,13 @@ if (isset($_POST['submit'])) {
                         <p> <input type="hidden" id="id" name="id" value="<?php echo $_GET['id']; ?>" />
                             <label>Name</label>
                             <input class="text-input medium-input" type="text" id="name" name="name" value="<?php echo $name; ?>" />
+                            <span class='input-notification success png_bg ' id="namesuccess">Valid Tag Name</span>
+                            <span class='input-notification error png_bg ' id="nameerror">Tag Name already exist!</span>
                         </p>
 
 
                         <p>
-                            <input class="button" type="submit" value="<?php echo $value; ?>" name="<?php echo $name1; ?>" />
+                            <input class="button" type="submit" id="submit" value="<?php echo $value; ?>" name="<?php echo $name1; ?>" />
                         </p>
 
                     </fieldset>
@@ -218,7 +249,38 @@ if (isset($_POST['submit'])) {
     </div> <!-- End .content-box -->
 
     <div class="clear"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#namesuccess').hide();
+            $('#nameerror').hide();
+            var name1 = $("#name").val();
 
+            $('#name').keyup(function() {
+                var name = $("#name").val();
+                var action = $('#submit').val();
+                $.ajax({
+                    method: "POST",
+                    url: "tag-ajax.php",
+                    data: {
+                        name: name,
+                        action: action,
+                        name1: name1
+                    },
+                    // dataType: "text"
+                }).done(function(msg) {
+                    // console.log(msg);
+                    if (msg == "validName") {
+                        $('#namesuccess').show();
+                        $('#nameerror').hide();
+                    } else if (msg == "invalidName") {
+                        $('#namesuccess').hide();
+                        $('#nameerror').show();
+                    }
+                })
+            });
+        })
+    </script>
 
     <!-- Start Notifications -->
     <!--

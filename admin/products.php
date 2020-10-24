@@ -18,6 +18,7 @@ if (isset($_GET['id'])) {
         $id = $_GET['id'];
         $sql = "DELETE from products WHERE id = $id";
         $result = $conn->query($sql);
+        $success = "Deleted Successfully";
     }
 
     if ($_GET['action'] == 'edit') {
@@ -70,6 +71,7 @@ if (isset($_POST['update'])) {
     $sql = "UPDATE products SET name = '$name', price= $price, image='$image', category='$category',tags='$tags',description='$description', color='$color'
     WHERE id = $id;";
     $result = $conn->query($sql);
+    $success = "Product updation successfull !";
 }
 
 
@@ -101,6 +103,7 @@ if (isset($_POST['submit'])) {
 
     $sql = "INSERT INTO products (name, price, image,category, tags,description,color) VALUES('$name',$price,'$image','$category','$tags','$description','$color')";
     $result = $conn->query($sql);
+    $success = "Product added successfully !";
 }
 
 ?>
@@ -148,12 +151,14 @@ if (isset($_POST['submit'])) {
             <div class="tab-content <?php if ($x == 0) : ?>default-tab <?php endif; ?>" id="tab1">
                 <!-- This is the target div. id must match the href of this div's tab -->
 
-                <div class="notification attention png_bg">
-                    <a href="#" class="close"><img src="resources/images/icons/cross_grey_small.png" title="Close this notification" alt="close" /></a>
-                    <div>
-                        This is a Content Box. You can put whatever you want in it. By the way, you can close this notification with the top-right cross.
+                <?php if (isset($success)) : ?>
+                    <div class="notification success png_bg">
+                        <a href="#" class="close"><img src="resources/images/icons/cross_grey_small.png" title="Close this notification" alt="close" /></a>
+                        <div>
+                            <?php echo $success; ?>
+                        </div>
                     </div>
-                </div>
+                <?php endif; ?>
 
                 <table>
 

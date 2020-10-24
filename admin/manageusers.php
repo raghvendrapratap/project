@@ -26,7 +26,7 @@ if (isset($_GET['id'])) {
         $pass = $_GET['pass'];
         $address = $_GET['address'];
         $name1 = "update";
-        $value = "Update";
+        $value = "update";
     }
 }
 
@@ -39,6 +39,7 @@ if (isset($_POST['update'])) {
     $address = isset($_POST['address']) ? $_POST['address'] : '';
     $sql = "UPDATE user SET name = '$name', email= '$email', pass='$pass', address='$address' WHERE id = $id;";
     $result = $conn->query($sql);
+    $success = "User updation successfull !";
 }
 
 
@@ -49,8 +50,18 @@ if (isset($_POST['submit'])) {
     $pass = isset($_POST['pass']) ? $_POST['pass'] : '';
     $address = isset($_POST['address']) ? $_POST['address'] : '';
 
-    $sql = "INSERT INTO user (name, email, pass,address) VALUES('$name','$email','$pass','$address')";
-    $result = $conn->query($sql);
+    if (isset($_POST['name'], $_POST['email'], $_POST['pass'])) {
+        $sql = "SELECT * from user WHERE name= '$name' OR email= '$email' ";
+        $result = $conn->query($sql);
+        if ($result->num_rows > 0) {
+            $error = "Username or Email already exist !";
+            $x = 1;
+        } else {
+            $sql = "INSERT INTO user (name, email, pass,address) VALUES('$name','$email','$pass','$address')";
+            $result = $conn->query($sql);
+            $success = "User added successfully !";
+        }
+    }
 }
 
 ?>
@@ -60,7 +71,7 @@ if (isset($_POST['submit'])) {
 
     <noscript>
         <!-- Show a notification if the user has disabled javascript -->
-        <div class="notification error png_bg">
+        <div class="notification success png_bg">
             <div>
                 Javascript is disabled or is not supported by your browser. Please <a href="http://browsehappy.com/" title="Upgrade to a better browser">upgrade</a> your browser or <a href="http://www.google.com/support/bin/answer.py?answer=23852" title="Enable Javascript in your browser">enable</a> Javascript to navigate the interface properly.
             </div>
@@ -97,13 +108,15 @@ if (isset($_POST['submit'])) {
 
             <div class="tab-content <?php if ($x == 0) : ?>default-tab <?php endif; ?>" id="tab1">
                 <!-- This is the target div. id must match the href of this div's tab -->
-
-                <div class="notification attention png_bg">
-                    <a href="#" class="close"><img src="resources/images/icons/cross_grey_small.png" title="Close this notification" alt="close" /></a>
-                    <div>
-                        This is a Content Box. You can put whatever you want in it. By the way, you can close this notification with the top-right cross.
+                <?php if (isset($success)) : ?>
+                    <div class="notification success png_bg">
+                        <a href="#" class="close"><img src="resources/images/icons/cross_grey_small.png" title="Close this notification" alt="close" /></a>
+                        <div>
+                            <?php echo $success; ?>
+                        </div>
                     </div>
-                </div>
+                <?php endif; ?>
+
 
                 <table>
 
@@ -212,6 +225,14 @@ if (isset($_POST['submit'])) {
             </div> <!-- End #tab1 -->
 
             <div class="tab-content <?php if ($x == 1) : ?>default-tab <?php endif; ?>" id="tab2">
+                <?php if (isset($error)) : ?>
+                    <div class="notification attention png_bg">
+                        <a href="#" class="close"><img src="resources/images/icons/cross_grey_small.png" title="Close this notification" alt="close" /></a>
+                        <div>
+                            <?php echo $error; ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
 
                 <form action="manageusers.php" method="post">
 
@@ -223,18 +244,22 @@ if (isset($_POST['submit'])) {
                                                                         }; ?>" />
                         <p>
                             <label>Name</label>
-                            <input class="text-input medium-input" type="text" id="name" name="name" value="<?php echo $name; ?>" />
+                            <input class="text-input medium-input" type="text" id="name" name="name" value="<?php echo $name; ?>" required />
+                            <span class='input-notification success png_bg ' id="namesuccess">Valid Username</span>
+                            <span class='input-notification error png_bg ' id="nameerror">Username already exist!</span>
                             <br />
                         </p>
                         <p>
                             <label>Email</label>
-                            <input class="text-input small-input" type="email" id="email" name="email" value="<?php echo $email; ?>" />
+                            <input class="text-input small-input" type="email" id="email" name="email" value="<?php echo $email; ?>" required />
+                            <span class='input-notification success png_bg ' id="emailsuccess">Valid Email</span>
+                            <span class='input-notification error png_bg ' id="emailerror">Email already exist!</span>
                             <br />
 
                         </p>
                         <p>
                             <label>Password</label>
-                            <input class="text-input small-input" type="password" id="pass" name="pass" value="<?php echo $pass; ?>" />
+                            <input class="text-input small-input" type="password" id="pass" name="pass" value="<?php echo $pass; ?>" required />
                             <br />
 
                         </p>
@@ -245,7 +270,7 @@ if (isset($_POST['submit'])) {
                         </p>
 
                         <p>
-                            <input class="button" type="submit" value="<?php echo $value; ?>" name="<?php echo $name1; ?>" />
+                            <input class="button" type="submit" id="submit" value="<?php echo $value; ?>" name="<?php echo $name1; ?>" />
                         </p>
 
                     </fieldset>
@@ -261,6 +286,66 @@ if (isset($_POST['submit'])) {
     </div> <!-- End .content-box -->
 
     <div class="clear"></div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#namesuccess').hide();
+            $('#nameerror').hide();
+            $('#emailsuccess').hide();
+            $('#emailerror').hide();
+            var name1 = $("#name").val();
+            var email1 = $("#email").val();
+
+            $('#name').keyup(function() {
+                var name = $("#name").val();
+                var action = $('#submit').val();
+                $.ajax({
+                    method: "POST",
+                    url: "user-ajax.php",
+                    data: {
+                        name: name,
+                        action: action,
+                        name1: name1
+                    },
+                    // dataType: "text"
+                }).done(function(msg) {
+                    if (msg == "validName") {
+                        $('#namesuccess').show();
+                        $('#nameerror').hide();
+                    } else if (msg == "invalidName") {
+                        $('#namesuccess').hide();
+                        $('#nameerror').show();
+                    }
+                })
+            });
+
+            $('#email').keyup(function() {
+                var email = $("#email").val();
+                var action = $('#submit').val();
+
+                $.ajax({
+                    method: "POST",
+                    url: "ajax.php",
+                    data: {
+                        email: email,
+                        action: action,
+                        email1: email1
+                    },
+                    // dataType: "text"
+                }).done(function(msg) {
+                    if (msg == "validEmail") {
+                        $('#emailsuccess').show();
+                        $('#emailerror').hide();
+                    } else if (msg == "invalidEmail") {
+                        $('#emailsuccess').hide();
+                        $('#emailerror').show();
+                    }
+                })
+            });
+
+
+        })
+    </script>
 
 
     <!-- Start Notifications -->
